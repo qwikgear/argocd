@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-application
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'git@github.com:QwikGear/argocd.git'
+    path: demo-dev/applications
+    targetRevision: HEAD
+  destination:
+    server: 'in=cluster'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
