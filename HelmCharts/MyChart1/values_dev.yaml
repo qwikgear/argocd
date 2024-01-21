@@ -1,7 +1,7 @@
 # Dev Override Values for my Helm Chart
 
 container:
-  image: QwikGear/k8sphp:version1
+  image: qwikgear/k8sphp:version1
 
 replicaCount: 3
 

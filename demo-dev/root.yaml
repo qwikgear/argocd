@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'git@github.com:QwikGear/argocd.git'
+    repoURL: 'git@github.com:qwikgear/argocd.git'
     path: demo-dev/applications
     targetRevision: HEAD
   destination:

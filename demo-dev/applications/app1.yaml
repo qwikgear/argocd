@@ -11,14 +11,14 @@ spec:
     namespace: app1
   source:
     path   : "HelmCharts/MyChart1"
-    repoURL: "git@github.com:QwikGear/argocd.git"
+    repoURL: "git@github.com:qwikgear/argocd.git"
     targetRevision: HEAD
     helm:
       valueFiles:
       - values_dev.yaml
       parameters:
       - name: "container.image"
-        value: QwikGear/app1:v1
+        value: qwikgear/app1:v1
 
   project: default
   syncPolicy:
