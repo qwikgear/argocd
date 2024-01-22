@@ -1,20 +1,23 @@
 apiVersion: v2
-name: prometheus-ipmi-exporter
-description: This is an IPMI exporter for Prometheus.
-
-type: application
-
-version: 0.2.0
-
-appVersion: "v1.7.0"
-
+description: Prometheus Blackbox Exporter
+name: prometheus-blackbox-exporter
+version: 8.9.0
+appVersion: v0.24.0
+home: https://github.com/prometheus/blackbox_exporter
+sources:
+  - https://github.com/prometheus/blackbox_exporter
+  - https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter
 keywords:
-  - metrics
-  - ipmi
+  - prometheus
+  - blackbox
   - monitoring
-
-home: https://github.com/prometheus-community/ipmi_exporter
-
 maintainers:
-  - name: lexfrei
-    email: f@lex.la
+  - name: desaintmartin
+    email: cedric@desaintmartin.fr
+  - name: gianrubio
+    email: gianrubio@gmail.com
+  - name: rsotnychenko
+    email: me@sota.sh
+  - name: monotek
+    email: monotek23@gmail.com
+type: application

@@ -1,44 +1,62 @@
-{{- if $.Values.serviceMonitor }}
-{{- if and ( .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" ) ( .Values.serviceMonitor.enabled ) }}
+{{- if .Values.serviceMonitor.enabled }}
+{{- range .Values.serviceMonitor.targets }}
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-{{- if .Values.serviceMonitor.labels }}
+  name: {{ template "prometheus-blackbox-exporter.fullname" $ }}-{{ .name }}
+  namespace: {{ template "prometheus-blackbox-exporter.namespace" $ }}
   labels:
-{{ toYaml .Values.serviceMonitor.labels | indent 4}}
-{{- end }}
-  name: {{ template "prometheus-ipmi-exporter.fullname" . }}
-{{- if .Values.serviceMonitor.namespace }}
-  namespace: {{ .Values.serviceMonitor.namespace }}
-{{- end }}
+    {{- include "prometheus-blackbox-exporter.labels" $ | nindent 4 }}
+    {{- if or $.Values.serviceMonitor.defaults.labels .labels }}
+    {{- toYaml (.labels | default $.Values.serviceMonitor.defaults.labels) | nindent 4 }}
+    {{- end }}
 spec:
   endpoints:
-  - targetPort: {{ .Values.service.port }}
-{{- if .Values.serviceMonitor.interval }}
-    interval: {{ .Values.serviceMonitor.interval }}
-{{- end }}
-{{- if .Values.serviceMonitor.telemetryPath }}
-    path: {{ .Values.serviceMonitor.telemetryPath }}
-{{- end }}
-{{- if .Values.serviceMonitor.timeout }}
-    scrapeTimeout: {{ .Values.serviceMonitor.timeout }}
-{{- end }}
-{{- if .Values.serviceMonitor.metricRelabelings }}
+  - port: http
+    scheme: {{ $.Values.serviceMonitor.scheme }}
+    {{- if $.Values.serviceMonitor.bearerTokenFile }}
+    bearerTokenFile: {{ $.Values.serviceMonitor.bearerTokenFile }}
+    {{- end }}
+    {{- if $.Values.serviceMonitor.tlsConfig }}
+    tlsConfig: {{ toYaml $.Values.serviceMonitor.tlsConfig | nindent 6 }}
+    {{- end }}
+    path: {{ $.Values.serviceMonitor.path }}
+    interval: {{ .interval | default $.Values.serviceMonitor.defaults.interval }}
+    scrapeTimeout: {{ .scrapeTimeout | default $.Values.serviceMonitor.defaults.scrapeTimeout }}
+    params:
+      module:
+      - {{ .module | default $.Values.serviceMonitor.defaults.module }}
+      target:
+      - {{ .url }}
+      {{- if .hostname }}
+      hostname:
+      - {{ .hostname }}
+      {{- end }}
     metricRelabelings:
-{{ toYaml .Values.serviceMonitor.metricRelabelings | indent 4 }}
+      - sourceLabels: [instance]
+        targetLabel: instance
+        replacement: {{ .url }}
+        action: replace
+      - sourceLabels: [target]
+        targetLabel: target
+        replacement: {{ .name }}
+        action: replace
+        {{- range $targetLabel, $replacement := .additionalMetricsRelabels | default $.Values.serviceMonitor.defaults.additionalMetricsRelabels }}
+      - targetLabel: {{ $targetLabel | quote }}
+        replacement: {{ $replacement | quote }}
+        action: replace
+        {{- end }}
+{{- if concat (.additionalRelabeling | default list) $.Values.serviceMonitor.defaults.additionalRelabeling }}
+    relabelings:
+{{ toYaml (concat (.additionalRelabeling | default list) $.Values.serviceMonitor.defaults.additionalRelabeling) | indent 6 }}
 {{- end }}
-  jobLabel: {{ template "prometheus-ipmi-exporter.fullname" . }}
-  namespaceSelector:
-    matchNames:
-    - {{ .Release.Namespace }}
+  jobLabel: "{{ $.Release.Name }}"
   selector:
     matchLabels:
-      {{- include "prometheus-ipmi-exporter.selectorLabels" . | nindent 6 }}
-{{- if .Values.serviceMonitor.targetLabels }}
-  targetLabels:
-{{- range .Values.serviceMonitor.targetLabels }}
-    - {{ . }}
-{{- end }}
-{{- end }}
+      {{- include "prometheus-blackbox-exporter.selectorLabels" $ | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ template "prometheus-blackbox-exporter.namespace" $ }}
 {{- end }}
 {{- end }}
