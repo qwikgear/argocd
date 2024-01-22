@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   # we use camptocamp/prometheus-pingdom-exporter image as giantswarm did not publish recent versions after 0.1.1
